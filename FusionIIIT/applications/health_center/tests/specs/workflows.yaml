@@ -1,0 +1,84 @@
+###############################################################################
+# PHC Module — Workflow Test Designs
+# Total WFs: 3  |  Min Tests Per WF: 2 (1 E2E + 1 Negative)
+# Required WF Tests: 2 × 3 = 6
+###############################################################################
+
+workflows:
+
+  - id: "PHC-WF-001"
+    title: "Patient Appointment Lifecycle"
+    description: "Complete flow: Patient books → Doctor added to schedule → Appointment confirmed → Visit documented → Records accessible"
+    start_state: "Patient authenticated, doctor available"
+    end_state: "Visit completed, medical records updated, accessible via /phc/medical-records/"
+
+    e2e_tests:
+      - scenario: "Full appointment lifecycle end-to-end"
+        steps:
+          - "Step 1: List doctors via GET /phc/doctors/"
+          - "Step 2: Check doctor availability via GET /phc/doctors/availability/"
+          - "Step 3: Book appointment via POST /phc/appointments/book/"
+          - "Step 4: Verify appointment in GET /phc/appointments/my/"
+          - "Step 5: Staff creates visit via POST /phc/visit/create/"
+          - "Step 6: Patient retrieves visit in GET /phc/medical-records/"
+          - "Step 7: Patient downloads records via GET /phc/medical-records/download/"
+        expected_final_state: "Appointment=completed, Visit=active, Medical records accessible, audit logs present"
+
+    negative_tests:
+      - scenario: "Appointment workflow interrupted - doctor goes off-duty during appointment period"
+        steps:
+          - "Step 1: Patient books appointment with Dr. Smith on 2026-04-20 10:00-11:00"
+          - "Step 2: Staff marks Dr. Smith inactive/off-duty before appointment time"
+          - "Step 3: Patient attempts visit at scheduled time"
+        expected_final_state: "Appointment remains booked but cannot proceed; patient notified; system prevents visit creation for unavailable doctor"
+
+  - id: "PHC-WF-002"
+    title: "Reimbursement Processing Workflow"
+    description: "Multi-stage claim validation: Patient submits → Compounder validates → Auditor approves/rejects → Accounts processes payment"
+    start_state: "Patient with eligible expense, claim documents ready"
+    end_state: "Payment processed and recorded; audit trail complete"
+
+    e2e_tests:
+      - scenario: "Complete reimbursement approval workflow"
+        steps:
+          - "Step 1: Patient POSTs claim to /phc/reimbursement/apply/ with documents"
+          - "Step 2: Compounder PATCHes status to validated via /phc/reimbursement/update-status/"
+          - "Step 3: Auditor PATCHes status to approved (same endpoint, different role)"
+          - "Step 4: Accounts processes payment via /phc/reimbursement/process-payment/"
+          - "Step 5: Patient GETs claim status via /phc/reimbursement/status/"
+          - "Step 6: Admin verifies audit logs for all 4 stages"
+        expected_final_state: "Claim status=completed; payment_date set; 4 audit log entries (patient→compounder→auditor→accounts)"
+
+    negative_tests:
+      - scenario: "Reimbursement claim rejected at compounder stage"
+        steps:
+          - "Step 1: Patient submits claim with incomplete documentation"
+          - "Step 2: Compounder reviews and rejects via status=rejected"
+          - "Step 3: Patient attempts to continue claim to auditor"
+        expected_final_state: "Claim locked in rejected state; no further progression allowed; patient directed to resubmit"
+
+  - id: "PHC-WF-003"
+    title: "Medical Record Access Control Workflow"
+    description: "Patient self-access workflow vs. Staff access workflow ensuring proper isolation and audit"
+    start_state: "Multiple patients with medical records; staff with search permissions"
+    end_state: "Patient views only own records; staff can access searched patients; audit logged"
+
+    e2e_tests:
+      - scenario: "Patient accesses own medical records complete workflow"
+        steps:
+          - "Step 1: Student A logs in; calls GET /phc/medical-records/"
+          - "Step 2: Records returned belong only to Student A"
+          - "Step 3: Student A downloads JSON via /phc/medical-records/download/"
+          - "Step 4: Audit system logs access with timestamp and user"
+          - "Step 5: Admin verifies audit log entry"
+        expected_final_state: "Patient A accessed own records; no cross-contamination; audit logged"
+
+    negative_tests:
+      - scenario: "Patient attempts indirect access to another patient's medical records"
+        steps:
+          - "Step 1: Student A and Student B both have medical records"
+          - "Step 2: Student A retrieves their appointment ID from GET /phc/appointments/my/"
+          - "Step 3: Student A attempts to retrieve Student B's visit via /phc/visits/ passing Student B's user_id"
+          - "Step 4: System should reject or return empty"
+          - "Step 5: Admin checks audit log for unauthorized access attempt"
+        expected_final_state: "Access denied; cross-patient access prevented; potential security incident logged"

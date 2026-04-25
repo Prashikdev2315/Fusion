@@ -1,0 +1,38 @@
+Defect ID,Related Test ID,Related Artifact,Severity,Description,Suggested Fix
+DEF-001,UC-001-HP-01,PHC-UC-001,Critical,Test blocked: Not Executed - API Endpoint Not Implemented. Endpoint /phc/appointments/book/ not found in urls.py,Implement missing API endpoints as per specification
+DEF-002,UC-001-AP-01,PHC-UC-001,Critical,Test blocked: Not Executed - API Endpoint Not Implemented. Endpoint /phc/appointments/my/ not implemented,Implement missing API endpoints as per specification
+DEF-003,UC-001-EX-01,PHC-UC-001,Critical,Test blocked: Not Executed - API Endpoint Not Implemented. Endpoints not accessible via API layer,Implement missing API endpoints as per specification
+DEF-004,UC-002-HP-01,PHC-UC-002,Critical,Test blocked: Not Executed - API Not Implemented. /phc/medical-records/ endpoint not available,Implement missing API endpoints as per specification
+DEF-005,UC-002-AP-01,PHC-UC-002,Critical,Test blocked: Not Executed - API Not Implemented. Download endpoint not configured,Implement missing API endpoints as per specification
+DEF-006,UC-002-EX-01,PHC-UC-002,Critical,Test blocked: Not Executed - API Not Implemented. Requires working medical records API,Implement missing API endpoints as per specification
+DEF-007,UC-003-HP-01,PHC-UC-003,Critical,Test blocked: Not Executed - API Not Implemented. /phc/visit/create/ endpoint not accessible,Implement missing API endpoints as per specification
+DEF-008,UC-003-AP-01,PHC-UC-003,Critical,Test blocked: Not Executed - API Not Implemented. API layer not fully exposed,Implement missing API endpoints as per specification
+DEF-009,UC-003-EX-01,PHC-UC-003,Critical,Test blocked: Not Executed - API Not Implemented. Error handling endpoints not accessible,Implement missing API endpoints as per specification
+DEF-010,UC-004-HP-01,PHC-UC-004,Critical,Test blocked: Not Executed - API Not Implemented. /phc/staff/patient/search/ endpoint not found,Implement missing API endpoints as per specification
+DEF-011,UC-004-AP-01,PHC-UC-004,Critical,Test blocked: Not Executed - API Not Implemented. Staff endpoints not exposed via API,Implement missing API endpoints as per specification
+DEF-012,UC-004-EX-01,PHC-UC-004,Critical,Test blocked: Not Executed - API Not Implemented. Query validation endpoints unavailable,Implement missing API endpoints as per specification
+DEF-013,UC-005-HP-01,PHC-UC-005,Critical,Test blocked: Not Executed - API Not Implemented. Reimbursement endpoints not accessible,Implement missing API endpoints as per specification
+DEF-014,UC-005-AP-01,PHC-UC-005,Critical,Test blocked: Not Executed - APIs Not Implemented. /phc/reimbursement/ endpoints not implemented,Implement missing API endpoints as per specification
+DEF-015,UC-005-EX-01,PHC-UC-005,Critical,Test blocked: Not Executed - APIs Not Implemented. Workflow endpoints missing,Implement missing API endpoints as per specification
+DEF-016,BR-001-Valid,PHC-BR-001,Critical,Test blocked: Not Executed - Need Working API. API endpoints required for testing,Implement missing API endpoints as per specification
+DEF-017,BR-001-Invalid,PHC-BR-001,Critical,Test blocked: Not Executed - Need Working API. Auth testing requires API endpoints,Implement missing API endpoints as per specification
+DEF-018,BR-002-Valid,PHC-BR-002,Critical,Test blocked: Not Executed - API Not Available. Record filtering endpoints needed,Implement missing API endpoints as per specification
+DEF-019,BR-002-Invalid,PHC-BR-002,Critical,Test blocked: Not Executed - API Not Available. Security test requires functional endpoints,Implement missing API endpoints as per specification
+DEF-020,BR-003-Valid,PHC-BR-003,Critical,Test blocked: Not Executed - API Not Available. Staff endpoints not exposed,Implement missing API endpoints as per specification
+DEF-021,BR-003-Invalid,PHC-BR-003,Critical,Test blocked: Not Executed - API Not Available. Role-based access testing requires API,Implement missing API endpoints as per specification
+DEF-022,BR-004-Valid,PHC-BR-004,Critical,Test blocked: Not Executed - Booking API Unavailable. Appointment endpoints not configured,Implement missing API endpoints as per specification
+DEF-023,BR-004-Invalid,PHC-BR-004,Critical,Test blocked: Not Executed - Booking API Unavailable. Unique constraint testing blocked,Implement missing API endpoints as per specification
+DEF-024,BR-005-Valid,PHC-BR-005,Critical,Test blocked: Not Executed - Booking API Unavailable. Schedule validation endpoints missing,Implement missing API endpoints as per specification
+DEF-025,BR-005-Invalid,PHC-BR-005,Critical,Test blocked: Not Executed - Booking API Unavailable. Validation testing requires API,Implement missing API endpoints as per specification
+DEF-026,BR-006-Valid,PHC-BR-006,Critical,Test blocked: Not Executed - Visit API Not Available. Visit creation endpoints not accessible,Implement missing API endpoints as per specification
+DEF-027,BR-006-Invalid,PHC-BR-006,Critical,Test blocked: Not Executed - Visit API Not Available. Error handling not testable,Implement missing API endpoints as per specification
+DEF-028,BR-007-Valid,PHC-BR-007,Critical,Test blocked: Not Executed - Reimbursement API Not Available. Role-based workflow endpoints missing,Implement missing API endpoints as per specification
+DEF-029,BR-007-Invalid,PHC-BR-007,Critical,Test blocked: Not Executed - Reimbursement API Not Available. Access control testing blocked,Implement missing API endpoints as per specification
+DEF-030,BR-008-Valid,PHC-BR-008,Critical,Test blocked: Not Executed - APIs Not Available. Audit verification requires working endpoints,Implement missing API endpoints as per specification
+DEF-031,BR-008-Invalid,PHC-BR-008,Critical,Test blocked: Not Executed - APIs Not Available. Database-level testing needed,Implement missing API endpoints as per specification
+DEF-032,WF-001-E2E,PHC-WF-001,Critical,Test blocked: Not Executed - APIs Not Implemented. Requires multiple endpoints working together,Implement missing API endpoints as per specification
+DEF-033,WF-001-Negative,PHC-WF-001,Critical,Test blocked: Not Executed - APIs Not Implemented. Workflow testing requires API layer,Implement missing API endpoints as per specification
+DEF-034,WF-002-E2E,PHC-WF-002,Critical,Test blocked: Not Executed - Reimbursement APIs Unavailable. Multi-stage workflow not accessible,Implement missing API endpoints as per specification
+DEF-035,WF-002-Negative,PHC-WF-002,Critical,Test blocked: Not Executed - Reimbursement APIs Unavailable. Rejection flow endpoints missing,Implement missing API endpoints as per specification
+DEF-036,WF-003-E2E,PHC-WF-003,Critical,Test blocked: Not Executed - Medical Records API Unavailable. Record access control testing blocked,Implement missing API endpoints as per specification
+DEF-037,WF-003-Negative,PHC-WF-003,Critical,Test blocked: Not Executed - Medical Records API Unavailable. Security testing requires functional endpoints,Implement missing API endpoints as per specification

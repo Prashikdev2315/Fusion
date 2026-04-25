@@ -289,3 +289,58 @@ ALLOW_PASS_RESET = True
 SESSION_COOKIE_AGE = 15 * 60
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_SAVE_EVERY_REQUEST = True
+
+
+# Logging
+APP_ENV = os.environ.get('APP_ENV', 'development').strip().lower()
+IS_PRODUCTION_ENV = APP_ENV in ('prod', 'production')
+DEFAULT_LOG_LEVEL = 'ERROR' if IS_PRODUCTION_ENV else 'INFO'
+LOG_LEVEL = os.environ.get('LOG_LEVEL', DEFAULT_LOG_LEVEL).upper()
+
+if LOG_LEVEL not in {'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'NOTSET'}:
+    LOG_LEVEL = DEFAULT_LOG_LEVEL
+
+LOG_DIR = os.path.join(BASE_DIR, '..', 'logs')
+if not os.path.exists(LOG_DIR):
+    os.makedirs(LOG_DIR, exist_ok=True)
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'standard': {
+            'format': '[%(asctime)s] %(levelname)s %(name)s: %(message)s',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'standard',
+            'level': LOG_LEVEL,
+        },
+        'file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOG_DIR, 'fusion.log'),
+            'maxBytes': 5 * 1024 * 1024,
+            'backupCount': 5,
+            'formatter': 'standard',
+            'level': LOG_LEVEL,
+        },
+    },
+    'root': {
+        'handlers': ['console', 'file'],
+        'level': LOG_LEVEL,
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': LOG_LEVEL,
+            'propagate': False,
+        },
+        'applications.health_center': {
+            'handlers': ['console', 'file'],
+            'level': LOG_LEVEL,
+            'propagate': False,
+        },
+    },
+}

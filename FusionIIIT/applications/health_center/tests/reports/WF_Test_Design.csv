@@ -1,0 +1,7 @@
+Test ID,WF ID,Test Category,Scenario,Expected Final State
+WF-001-E2E,PHC-WF-001,End-to-End,Complete appointment lifecycle,See specification
+WF-001-Negative,PHC-WF-001,Negative,Doctor offline during appointment,See specification
+WF-002-E2E,PHC-WF-002,End-to-End,Reimbursement approval workflow,See specification
+WF-002-Negative,PHC-WF-002,Negative,Claim rejected at compounder stage,See specification
+WF-003-E2E,PHC-WF-003,End-to-End,Patient accesses own records,See specification
+WF-003-Negative,PHC-WF-003,Negative,Cross-patient access attempt,See specification

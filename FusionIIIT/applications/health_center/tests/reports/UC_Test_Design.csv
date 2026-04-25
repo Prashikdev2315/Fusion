@@ -1,0 +1,16 @@
+Test ID,UC ID,Test Category,Scenario,Preconditions,Input / Action,Expected Result
+UC-001-AP-01,PHC-UC-001,Alternate Path,"After booking, patient views appointments",See specification,See specification,See specification
+UC-001-EX-01,PHC-UC-001,Exception,Student attempts to book with past date,See specification,See specification,See specification
+UC-001-HP-01,PHC-UC-001,Happy Path,Student books appointment with available doctor on future date,See specification,See specification,See specification
+UC-002-AP-01,PHC-UC-002,Alternate Path,Patient downloads medical records as JSON,See specification,See specification,See specification
+UC-002-EX-01,PHC-UC-002,Exception,New patient with no records,See specification,See specification,See specification
+UC-002-HP-01,PHC-UC-002,Happy Path,Patient views medical records,See specification,See specification,See specification
+UC-003-AP-01,PHC-UC-003,Alternate Path,Staff creates visit with minimal prescription,See specification,See specification,See specification
+UC-003-EX-01,PHC-UC-003,Exception,Staff creates visit with invalid appointment ID,See specification,See specification,See specification
+UC-003-HP-01,PHC-UC-003,Happy Path,Staff creates visit with diagnosis and prescription,See specification,See specification,See specification
+UC-004-AP-01,PHC-UC-004,Alternate Path,Staff searches patient by name,See specification,See specification,See specification
+UC-004-EX-01,PHC-UC-004,Exception,Empty query handling,See specification,See specification,See specification
+UC-004-HP-01,PHC-UC-004,Happy Path,Staff searches patient by username,See specification,See specification,See specification
+UC-005-AP-01,PHC-UC-005,Alternate Path,Compounder rejects claim,See specification,See specification,See specification
+UC-005-EX-01,PHC-UC-005,Exception,Auditor fraud detection,See specification,See specification,See specification
+UC-005-HP-01,PHC-UC-005,Happy Path,Complete reimbursement workflow,See specification,See specification,See specification

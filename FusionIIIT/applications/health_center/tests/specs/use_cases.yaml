@@ -1,0 +1,127 @@
+###############################################################################
+# PHC Module — Use Case Test Designs
+# Total UCs: 5  |  Min Tests Per UC: 3 (1 HP + 1 AP + 1 EX)
+# Required UC Tests: 3 × 5 = 15
+###############################################################################
+
+use_cases:
+
+  - id: "PHC-UC-001"
+    title: "Book Appointment"
+    description: "Student/Faculty books appointment with a doctor for a specific date and time"
+    actors: "Patient (Student/Professor)"
+    preconditions: "Patient is authenticated; doctor list is available; selected doctor has availability"
+
+    happy_paths:
+      - scenario: "Patient books appointment with available doctor on valid future date"
+        preconditions: "Patient logged in; doctor exists with schedule; date is future; time slot is available"
+        input_action: "POST /phc/appointments/book/ with {doctor_id, date, time_slot}"
+        expected_result: "Appointment created with status=booked; HTTP 201; appointment_id returned"
+
+    alternate_paths:
+      - scenario: "Patient books appointment and immediately views their appointments"
+        preconditions: "Patient logged in; appointment booking succeeds"
+        input_action: "GET /phc/appointments/my/ after booking"
+        expected_result: "Newly booked appointment appears in patient's appointment list"
+
+    exception_paths:
+      - scenario: "Patient attempts to book appointment on past date"
+        preconditions: "Patient logged in; date is in the past"
+        input_action: "POST /phc/appointments/book/ with past date"
+        expected_result: "Request rejected with HTTP 400; error message indicates invalid date"
+
+  - id: "PHC-UC-002"
+    title: "View Medical Records"
+    description: "Patient views their complete medical history including appointments, visits, prescriptions"
+    actors: "Patient (Student/Professor)"
+    preconditions: "Patient is authenticated; patient has existing medical history records"
+
+    happy_paths:
+      - scenario: "Patient views medical records after completing a visit"
+        preconditions: "Patient logged in; patient has completed appointment; visit record exists; prescription created"
+        input_action: "GET /phc/medical-records/"
+        expected_result: "Medical records returned with visit id, diagnosis, prescription, created_at timestamp; HTTP 200"
+
+    alternate_paths:
+      - scenario: "Patient downloads medical records as JSON file"
+        preconditions: "Patient logged in; medical records exist"
+        input_action: "GET /phc/medical-records/download/"
+        expected_result: "JSON file downloaded with all medical records; Content-Disposition header set"
+
+    exception_paths:
+      - scenario: "New patient has no medical records"
+        preconditions: "Patient logged in; student is new with no prior visits"
+        input_action: "GET /phc/medical-records/"
+        expected_result: "Empty list returned; HTTP 200; no error"
+
+  - id: "PHC-UC-003"
+    title: "Create Visit Record"
+    description: "Staff/Compounder creates a visit record for patient after appointment with diagnosis and prescription"
+    actors: "PHC Staff (Compounder)"
+    preconditions: "Staff authenticated; appointment exists; appointment status is booked; patient exists"
+
+    happy_paths:
+      - scenario: "Staff creates visit record with complete diagnosis and prescription"
+        preconditions: "Staff logged in; patient has booked appointment; doctor assigned"
+        input_action: "POST /phc/visit/create/ with {appointment_id, diagnosis, prescription, doctor_id}"
+        expected_result: "Visit record created and linked to appointment; HTTP 201; visit_id returned"
+
+    alternate_paths:
+      - scenario: "Staff creates visit record with minimal prescription information"
+        preconditions: "Staff logged in; appointment exists"
+        input_action: "POST /phc/visit/create/ with minimal prescription details"
+        expected_result: "Visit record created successfully; prescription text stored"
+
+    exception_paths:
+      - scenario: "Staff attempts to create visit for non-existent appointment"
+        preconditions: "Staff logged in; appointment_id does not exist"
+        input_action: "POST /phc/visit/create/ with invalid appointment_id"
+        expected_result: "Request rejected with HTTP 404; error indicates appointment not found"
+
+  - id: "PHC-UC-004"
+    title: "Patient Search (Staff)"
+    description: "Staff searches for patient records by ID, username, or full name"
+    actors: "PHC Staff"
+    preconditions: "Staff authenticated; patient records exist in system"
+
+    happy_paths:
+      - scenario: "Staff searches patient by username"
+        preconditions: "Staff logged in; patient with username exists; valid search query"
+        input_action: "GET /phc/staff/patient/search/ with search_query=username"
+        expected_result: "Patient record returned with id, username, blood_type, last_appointment; HTTP 200"
+
+    alternate_paths:
+      - scenario: "Staff searches patient by first name"
+        preconditions: "Staff logged in; patient with matching first name exists"
+        input_action: "GET /phc/staff/patient/search/ with search_query=firstname"
+        expected_result: "Matching patients returned in list; multiple results possible"
+
+    exception_paths:
+      - scenario: "Staff searches with empty or very short query"
+        preconditions: "Staff logged in"
+        input_action: "GET /phc/staff/patient/search/ with search_query='a' or empty"
+        expected_result: "Empty list returned or minimum length error; HTTP 400"
+
+  - id: "PHC-UC-005"
+    title: "Reimbursement Workflow"
+    description: "Patient submits reimbursement claim, compounder validates, auditor verifies, accounts processes"
+    actors: "Patient, Compounder, Auditor, Accounts Staff"
+    preconditions: "Patient authenticated; reimbursement documents available; staff roles exist"
+
+    happy_paths:
+      - scenario: "Patient applies for reimbursement, passes compounder check, auditor approves, payment processed"
+        preconditions: "Patient has claim-eligible medical expense; documents prepared; compounder and auditor active"
+        input_action: "POST /phc/reimbursement/apply/ with claim details; PATCH /phc/reimbursement/update-status/ by compounder; by auditor; process payment"
+        expected_result: "Claim created status=pending → validated by compounder → verified by auditor → payment processed; final status=completed"
+
+    alternate_paths:
+      - scenario: "Compounder rejects claim due to insufficient documentation"
+        preconditions: "Patient submitted claim; compounder identification incomplete documents"
+        input_action: "PATCH /phc/reimbursement/update-status/ with status=rejected by compounder"
+        expected_result: "Claim status updated to rejected; reason recorded; notification sent to patient"
+
+    exception_paths:
+      - scenario: "Auditor identifies fraudulent claim after compounder approval"
+        preconditions: "Claim passed compounder stage; auditor detects inconsistency"
+        input_action: "PATCH /phc/reimbursement/update-status/ with status=rejected by auditor"
+        expected_result: "Claim reverted to rejected; audit log recorded; payment not processed"

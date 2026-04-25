@@ -1,0 +1,17 @@
+Test ID,BR ID,Test Category,Input / Action,Expected Result
+BR-001-Invalid,PHC-BR-001,Invalid,See specification,See specification
+BR-001-Valid,PHC-BR-001,Valid,See specification,See specification
+BR-002-Invalid,PHC-BR-002,Invalid,See specification,See specification
+BR-002-Valid,PHC-BR-002,Valid,See specification,See specification
+BR-003-Invalid,PHC-BR-003,Invalid,See specification,See specification
+BR-003-Valid,PHC-BR-003,Valid,See specification,See specification
+BR-004-Invalid,PHC-BR-004,Invalid,See specification,See specification
+BR-004-Valid,PHC-BR-004,Valid,See specification,See specification
+BR-005-Invalid,PHC-BR-005,Invalid,See specification,See specification
+BR-005-Valid,PHC-BR-005,Valid,See specification,See specification
+BR-006-Invalid,PHC-BR-006,Invalid,See specification,See specification
+BR-006-Valid,PHC-BR-006,Valid,See specification,See specification
+BR-007-Invalid,PHC-BR-007,Invalid,See specification,See specification
+BR-007-Valid,PHC-BR-007,Valid,See specification,See specification
+BR-008-Invalid,PHC-BR-008,Invalid,See specification,See specification
+BR-008-Valid,PHC-BR-008,Valid,See specification,See specification

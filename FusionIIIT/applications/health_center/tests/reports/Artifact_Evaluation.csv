@@ -1,0 +1,17 @@
+Artifact ID,Artifact Type,Tests Designed,Pass,Partial,Fail,Final Status,Remarks
+PHC-UC-001,Use Case,3,0,0,3,Not Tested - API Not Available,Book Appointment
+PHC-UC-002,Use Case,3,0,0,3,Not Tested - API Not Available,View Medical Records
+PHC-UC-003,Use Case,3,0,0,3,Not Tested - API Not Available,Create Visit Record
+PHC-UC-004,Use Case,3,0,0,3,Not Tested - API Not Available,Patient Search
+PHC-UC-005,Use Case,3,0,0,3,Not Tested - API Not Available,Reimbursement Workflow
+PHC-BR-001,Business Rule,2,0,0,2,Not Tested - API Not Available,Authentication Required
+PHC-BR-002,Business Rule,2,0,0,2,Not Tested - API Not Available,Patient Record Isolation
+PHC-BR-003,Business Rule,2,0,0,2,Not Tested - API Not Available,Staff Unrestricted Access
+PHC-BR-004,Business Rule,2,0,0,2,Not Tested - API Not Available,Appointment Slot Uniqueness
+PHC-BR-005,Business Rule,2,0,0,2,Not Tested - API Not Available,Doctor Schedule Required
+PHC-BR-006,Business Rule,2,0,0,2,Not Tested - API Not Available,Visit Appointment Link
+PHC-BR-007,Business Rule,2,0,0,2,Not Tested - API Not Available,Reimbursement Role-Based Access
+PHC-BR-008,Business Rule,2,0,0,2,Not Tested - API Not Available,Audit Logging Required
+PHC-WF-001,Workflow,2,0,0,2,Not Tested - API Not Available,Patient Appointment Lifecycle
+PHC-WF-002,Workflow,2,0,0,2,Not Tested - API Not Available,Reimbursement Processing
+PHC-WF-003,Workflow,2,0,0,2,Not Tested - API Not Available,Medical Record Access Control

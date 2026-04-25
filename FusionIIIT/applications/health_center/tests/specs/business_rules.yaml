@@ -1,0 +1,111 @@
+###############################################################################
+# PHC Module — Business Rules Test Designs
+# Total BRs: 8  |  Min Tests Per BR: 2 (1 Valid + 1 Invalid)
+# Required BR Tests: 2 × 8 = 16
+###############################################################################
+
+business_rules:
+
+  - id: "PHC-BR-001"
+    title: "Authentication Required for PHC Access"
+    description: "Only authenticated users can access PHC module endpoints"
+    constraint: "All PHC endpoints require valid Django user session/token"
+
+    valid_tests:
+      - input_action: "Access /phc/appointments/ with authenticated user session"
+        expected_result: "Data returned; HTTP 200 OK"
+
+    invalid_tests:
+      - input_action: "Access /phc/appointments/ without authentication (no session/token)"
+        expected_result: "Request rejected; HTTP 401 Unauthorized or redirected to login"
+
+  - id: "PHC-BR-002"
+    title: "Patient Can Only Access Own Records"
+    description: "Student/Faculty patients can only view and modify their own medical records, appointments, reimbursement claims"
+    constraint: "Patient records filtered by request.user.id; cross-patient access blocked"
+
+    valid_tests:
+      - input_action: "Student A lists appointments with GET /phc/appointments/my/"
+        expected_result: "Only Student A's appointments returned; HTTP 200"
+
+    invalid_tests:
+      - input_action: "Student A attempts to access Student B's appointments via direct query /phc/appointments/my/ after setting cookies to B"
+        expected_result: "Request returns only Student A's appointments OR access denied; cross-patient access prevented"
+
+  - id: "PHC-BR-003"
+    title: "Staff Can Search All Patient Records"
+    description: "PHC Staff (Compounder, Auditor) can search and access all patient records without restriction"
+    constraint: "Staff users have role=phc_staff; staff queries unfiltered by patient_id"
+
+    valid_tests:
+      - input_action: "PHC Staff searches for any patient using /phc/staff/patient/search/?query=username"
+        expected_result: "Patient record returned regardless of searcher-patient relationship; HTTP 200"
+
+    invalid_tests:
+      - input_action: "Student attempts to use /phc/staff/patient/search/ endpoint"
+        expected_result: "Request rejected with HTTP 403 Forbidden; error indicates insufficient permissions"
+
+  - id: "PHC-BR-004"
+    title: "Appointment Slot Uniqueness"
+    description: "Each doctor-date-time slot can have only one booked appointment"
+    constraint: "Unique constraint on (doctor_id, date, time_slot) where status=booked"
+
+    valid_tests:
+      - input_action: "Patient A books Dr. Smith on 2026-04-20 at 10:00; Patient B books Dr. Smith on 2026-04-20 at 11:00"
+        expected_result: "Both appointments created; different time slots; HTTP 201 for each"
+
+    invalid_tests:
+      - input_action: "Patient A books Dr. Smith on 2026-04-20 at 10:00; Patient B attempts same slot: Dr. Smith on 2026-04-20 at 10:00"
+        expected_result: "Second request rejected with HTTP 409 Conflict; error indicates slot already booked"
+
+  - id: "PHC-BR-005"
+    title: "Doctor Must Have Schedule to Receive Appointments"
+    description: "Only doctors with active schedule entries for requested date/time can receive appointment bookings"
+    constraint: "Doctor must have Doctors_Schedule entry with matching day-of-week and time range"
+
+    valid_tests:
+      - input_action: "Book appointment with Dr. Smith on Monday 10:00-11:00 when Dr. Smith has schedule entry (day=0, from_time=09:00, to_time=12:00)"
+        expected_result: "Appointment created; HTTP 201"
+
+    invalid_tests:
+      - input_action: "Book appointment with Dr. Smith on Monday 10:00 when Dr. Smith has no schedule entry for Monday"
+        expected_result: "Request rejected with HTTP 400; error indicates doctor unavailable on requested date"
+
+  - id: "PHC-BR-006"
+    title: "Visit Must Link to Existing Appointment"
+    description: "Visit records can only be created for existing, booked appointments"
+    constraint: "appointment_id supplied to visit creation must reference valid Appointment with status=booked"
+
+    valid_tests:
+      - input_action: "Create visit for existing appointment with status=booked"
+        expected_result: "Visit record created; HTTP 201; visit linked to appointment"
+
+    invalid_tests:
+      - input_action: "Create visit for non-existent appointment_id or appointment with status=completed"
+        expected_result: "Request rejected with HTTP 404 or 400; error indicates invalid appointment"
+
+  - id: "PHC-BR-007"
+    title: "Reimbursement Workflow Enforces Role-Based Stage Access"
+    description: "Reimbursement claims progress through stages: Patient→Compounder→Auditor→Accounts; only assigned role can approve at each stage"
+    constraint: "Update endpoints validate user role before status change; compounder can only update pending→validated; auditor pending→approved/rejected"
+
+    valid_tests:
+      - input_action: "Compounder with role=phc_staff updates claim status from pending→validated"
+        expected_result: "Status updated; HTTP 200; audit log recorded"
+
+    invalid_tests:
+      - input_action: "Student with role=student attempts to update claim status"
+        expected_result: "Request rejected with HTTP 403 Forbidden; error indicates insufficient permissions"
+
+  - id: "PHC-BR-008"
+    title: "Audit Logging on All Sensitive Operations"
+    description: "All Create/Update/Delete operations on sensitive records (appointments, visits, reimbursement) are logged with user, timestamp, action"
+    constraint: "PHCAppointmentAuditLog, PHCReimbursementAuditLog entries created for each mutation"
+
+    valid_tests:
+      - input_action: "Staff creates visit record; check audit logs for entry"
+        expected_result: "Audit log entry exists with action, performed_by, timestamp, visit reference; HTTP 200"
+
+    invalid_tests:
+      - input_action: "Delete appointment without corresponding audit log entry"
+        expected_result: "Audit log must exist; if missing, indicates logging failure (defect)"

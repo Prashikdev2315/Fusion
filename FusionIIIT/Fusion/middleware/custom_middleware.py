@@ -1,9 +1,23 @@
 # custom_middleware.py
 from django.contrib.auth.signals import user_logged_in
 from django.dispatch import receiver
+from django.db import DatabaseError
 from applications.globals.models import (ExtraInfo, Feedback, HoldsDesignation,
                                          Issue, IssueImage, DepartmentInfo,ModuleAccess)
 from django.shortcuts import get_object_or_404, redirect, render
+from applications.health_center.role_guards import resolve_phc_role
+import logging
+
+
+logger = logging.getLogger(__name__)
+
+
+def _safe_get_phc_role(user):
+    """Use new comprehensive role resolution that includes designation checks"""
+    try:
+        return resolve_phc_role(user)
+    except DatabaseError:
+        return None
 
 def user_logged_in_middleware(get_response):
     @receiver(user_logged_in)
@@ -14,7 +28,6 @@ def user_logged_in_middleware(get_response):
             # For example, if your User model has a field named 'custom_field', you can access it like:
             if user.is_authenticated:
                 desig = list(HoldsDesignation.objects.select_related('user','working','designation').all().filter(working = request.user).values_list('designation'))
-                print(desig)
                 b = [i for sub in desig for i in sub]
                 design = HoldsDesignation.objects.select_related('user','designation').filter(working=request.user)
 
@@ -25,30 +38,29 @@ def user_logged_in_middleware(get_response):
 
                 for i in design:
                     if str(i.designation) != str(user.extrainfo.user_type):
-                        print('-------')
-                        print(i.designation)
-                        print(user.extrainfo.user_type)
-                        print('')
+                        logger.debug('Appending additional designation from holds designation table')
                         designation.append(str(i.designation))
 
-                for i in designation:
-                    print(i)
+                logger.debug('Resolved %s designations for authenticated user', len(designation))
+
+                if not designation:
+                    designation.append(str(user.extrainfo.user_type))
 
                 request.session['currentDesignationSelected'] = designation[0]
                 request.session['allDesignations'] = designation 
                 first_designation = designation[0]
                 module_access = ModuleAccess.objects.filter(designation=first_designation).first()
+                access_rights = {}
                 
                 if module_access:
-                    access_rights = {}
-    
                     field_names = [field.name for field in ModuleAccess._meta.get_fields() if field.name not in ['id', 'designation']]
     
                     for field_name in field_names:
                         access_rights[field_name] = getattr(module_access, field_name)
-    
-                request.session['moduleAccessRights'] = access_rights           
-                print("logged iN")
+
+                request.session['moduleAccessRights'] = access_rights
+                request.session['phc_role'] = _safe_get_phc_role(user)
+                logger.info('User session role context initialized')
                 
             # Set the flag in the session to indicate that the function has bee+n executed
             request.session['function_executed'] = True

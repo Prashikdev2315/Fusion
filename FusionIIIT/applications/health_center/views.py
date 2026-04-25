@@ -1,5 +1,6 @@
 import json
 import pandas as pd
+import logging
 from django.http import FileResponse,Http404
 from datetime import date, datetime, timedelta, time
 import xlrd
@@ -21,6 +22,9 @@ from .models import ( Constants,All_Medicine,All_Prescribed_medicine,All_Prescri
 from .utils import datetime_handler, compounder_view_handler, student_view_handler
 from applications.filetracking.sdk.methods import *
 from django.db.models import Q
+
+
+logger = logging.getLogger(__name__)
 
 
 
@@ -444,25 +448,19 @@ def schedule_entry(request):
     for i in range(1, 19):
         try:
             doc_name = str(z.cell(i,0).value)
-            print(doc_name)
             do=Doctor.objects.filter(doctor_name=doc_name)
             doc_id = do[0]
-            print(doc_id)
             day = str(z.cell(i,1).value)
             days = Constants.DAYS_OF_WEEK
             for p,d in days:
                 if d==day:
                     da=p
-            print(da)
             x=z.cell(i,2).value
             x=int(x*24*3600)
             from_time=time(x//3600,(x%3600)//60,x%60)
-            print(from_time)
-            print(from_time)
             y=z.cell(i,3).value
             y=int(y*24*3600)
             to_time=time(y//3600,(y%3600)//60,y%60)
-            print(to_time)
             room=int(z.cell(i,4).value)
             u = Schedule.objects.create(
                         doctor_id = doc_id,
@@ -472,10 +470,9 @@ def schedule_entry(request):
                         room=room,
                         date=datetime.now()
             )
-            print("Schedule done -> ")
-        except Exception as e:
-            print(e)
-            print(i)
+            logger.debug('Created schedule entry from import row %s', i)
+        except Exception:
+            logger.exception('Failed to import schedule entry at row %s', i)
             pass
     return HttpResponse("Hello")
 
@@ -492,19 +489,16 @@ def doctor_entry(request):
     for i in range(1, 5):
         try:
             name = str(z.cell(i,0).value)
-            print(name)
             phone = str(int(z.cell(i,1).value))
-            print(phone)
             spl = str(z.cell(i,2).value)
             u = Doctor.objects.create(
                         doctor_name = name,
                         doctor_phone = phone,
                         specialization=spl
             )
-            print("Doctor done -> ")
-        except Exception as e:
-            print(e)
-            print(i)
+            logger.debug('Created doctor entry from import row %s', i)
+        except Exception:
+            logger.exception('Failed to import doctor entry at row %s', i)
             pass
     return HttpResponse("Hello")
 
@@ -521,19 +515,16 @@ def pathologist_entry(request):
     for i in range(1, 5):
         try:
             name = str(z.cell(i,0).value)
-            print(name)
             phone = str(int(z.cell(i,1).value))
-            print(phone)
             spl = str(z.cell(i,2).value)
             u = Pathologist.objects.create(
                         pathologist_name = name,
                         pathologist_phone = phone,
                         specialization=spl
             )
-            print("Pathologist done -> ")
-        except Exception as e:
-            print(e)
-            print(i)
+            logger.debug('Created pathologist entry from import row %s', i)
+        except Exception:
+            logger.exception('Failed to import pathologist entry at row %s', i)
             pass
     return HttpResponse("Hello")
 
@@ -555,14 +546,12 @@ def compounder_entry(request):
             dep = str(z.cell(i,2).value)
             email = str(z.cell(i,3).value)
             des = str(z.cell(i,4).value)
-            print(dep,des)
             at = 0
             for i in range(0,len(email)):
                 if(email[i]=='@'):
                     at = i
                     break
             username = str(email[0:at])
-            print(username)
             dd = ""
             dess = ""
             try:
@@ -578,7 +567,6 @@ def compounder_entry(request):
             first_name = ""
             for i in range(0,len(name)-1):
                 first_name += name[i]
-            print(first_name,last_name)
             u = User.objects.create_user(
                         username = username,
                         password = 'hello123',
@@ -587,7 +575,6 @@ def compounder_entry(request):
                         email = email,
             )
             sex = "M"
-            print(str(i)+" user creation done")
             f = ExtraInfo.objects.create(
                 sex = sex,
                 user = u,
@@ -598,17 +585,15 @@ def compounder_entry(request):
                 user_type = 'compounder',
                 phone_no = 9999999999
             )
-            print("extraInfoCreation done -> "+str(i))
 
             qz = HoldsDesignation.objects.create(
                 user = u,
                 working = u,
                 designation = dess,
             )
-            print("All done yippe -> " + str(i))
-        except Exception as e:
-            print(e)
-            print(i)
+            logger.debug('Created compounder entry from import row %s', i)
+        except Exception:
+            logger.exception('Failed to import compounder entry at row %s', i)
             pass
     return HttpResponse("Hello")
 
@@ -780,7 +765,7 @@ def compounder_view_prescription(request,prescription_id):
     doctors=Doctor.objects.filter(active=True).order_by('id')
     follow_presc =Prescription_followup.objects.filter(prescription_id=prescription).order_by('-id')
     if request.method == "POST":
-        print("post")
+        logger.debug('Compounder prescription view accessed with POST')
     return render(request, 'phcModule/phc_compounder_view_prescription.html',{'prescription':prescription,
                             'pre_medicine':pre_medicine,'doctors':doctors,
                             "follow_presc":follow_presc})

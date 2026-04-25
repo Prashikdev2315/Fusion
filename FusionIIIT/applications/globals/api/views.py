@@ -15,6 +15,7 @@ from rest_framework.decorators import api_view, permission_classes,authenticatio
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.http import JsonResponse
+from django.db import DatabaseError
 
 
 from . import serializers
@@ -24,6 +25,16 @@ from .utils import get_and_authenticate_user
 from notifications.models import Notification
 
 User = get_user_model()
+
+
+def _safe_get_phc_role(user):
+    try:
+        from applications.health_center.role_guards import resolve_phc_role
+        role = resolve_phc_role(user)
+        return role
+    except Exception as e:
+        # If PHC tables are not migrated or any other error occurs, do not block auth endpoints.
+        return None
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -50,11 +61,14 @@ def login(request):
         'success' : 'True',
         'message' : 'User logged in successfully',
         'token' : data['auth_token'],
-        'designations':designation
+        'designations':designation,
+        'phc_role': _safe_get_phc_role(user),
     }
     return Response(data=resp, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def logout(request):
     request.user.auth_token.delete()
     resp = {
@@ -63,7 +77,8 @@ def logout(request):
     return Response(data=resp, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def auth_view(request):
     user=request.user
     name = request.user.first_name +"_"+ request.user.last_name
@@ -98,7 +113,8 @@ def auth_view(request):
         'name': name,
         'roll_no': roll_no,
         'accessible_modules': accessible_modules,
-        'last_selected_role': last_selected_role
+        'last_selected_role': last_selected_role,
+        'phc_role': _safe_get_phc_role(user),
     }
     
     return Response(data=resp,status=status.HTTP_200_OK)
@@ -116,6 +132,7 @@ def notification(request):
     return Response(data=resp,status=status.HTTP_200_OK)
 
 @api_view(['PATCH'])
+@authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def update_last_selected_role(request):
     new_role = request.data.get('last_selected_role')
